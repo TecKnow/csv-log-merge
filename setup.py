@@ -16,6 +16,10 @@ setuptools.setup(
     classifiers=[
         "Programming Language :: Python :: 3",
         "Operating System :: OS Independent",
+        "Development Status :: 2 - Pre-Alpha",
     ],
     python_requires='>=3.6',
+    entry_points={
+        "console_scripts": [],
+    },
 )
