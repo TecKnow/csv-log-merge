@@ -1,8 +1,13 @@
-
+import logging
 import os
 import csv
 import shutil
 from datetime import datetime
+
+logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
+logger.info(f"{__name__} has been entered.")
 
 
 def get_csv_files(sourcedir):
@@ -10,13 +15,13 @@ def get_csv_files(sourcedir):
     Make a list of all csv files in a directory
     """
 
-    os.chdir(sourcedir)    
+    os.chdir(sourcedir)
     csvfiles = []
     for csvFilename in os.listdir(csv_dir):
         if not csvFilename.endswith('.csv'):
             continue # skip non-CSV Files
         else:
-            csvfiles.append(csvFilename)       
+            csvfiles.append(csvFilename)
     return(csvfiles)
 
 def folder_name():
@@ -49,7 +54,7 @@ def write_merged_csv(source_dir, sourcefiles, dest_dir):
                     for line in csv_reader:
                         csv_writer.writerow(line)
                 shutil.move(csvfile, fullfoldername)
-    
+
 
 
 
