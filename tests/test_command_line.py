@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from csvlog.command_line import create_csv_merge_argument_parser
+from src.csvlog.command_line import create_csv_merge_argument_parser
 
 
 class TestCommandLine:
