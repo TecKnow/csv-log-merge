@@ -1,6 +1,6 @@
+import csv
 import logging
 import os
-import csv
 import shutil
 from datetime import datetime
 
@@ -19,20 +19,18 @@ def get_csv_files(sourcedir):
     csvfiles = []
     for csvFilename in os.listdir(csv_dir):
         if not csvFilename.endswith('.csv'):
-            continue # skip non-CSV Files
+            continue  # skip non-CSV Files
         else:
             csvfiles.append(csvFilename)
-    return(csvfiles)
+    return (csvfiles)
+
 
 def folder_name():
     today = datetime.now()
-    return(str("Uploaded " + today.strftime('%y%m%d%H%M')))
-
-
+    return (str("Uploaded " + today.strftime('%y%m%d%H%M')))
 
 
 def write_merged_csv(source_dir, sourcefiles, dest_dir):
-
     """
     Function makes one output csv file from all csv files in a source directory.
     """
@@ -56,14 +54,11 @@ def write_merged_csv(source_dir, sourcefiles, dest_dir):
                 shutil.move(csvfile, fullfoldername)
 
 
-
-
 csv_dir = 'C:\\Users\\CPerkins\\Desktop\\python_work\\CSVs\\In'
 dest_csv_dir = 'C:\\Users\\CPerkins\\Desktop\\python_work\\CSVs\\Out\\'
 dest_csv_backup = 'C:\\Users\\CPerkins\\Desktop\\python_work\\CSVs\\Backups\\'
 csvfiles = get_csv_files(csv_dir)
-write_merged_csv(csv_dir, csvfiles,dest_csv_dir)
-
+write_merged_csv(csv_dir, csvfiles, dest_csv_dir)
 
 # Header row
 # Record Type,Material Order,Job number,Description,,,,Record key,,
