@@ -21,6 +21,6 @@ setuptools.setup(
     ],
     python_requires='>=3.6',
     entry_points={
-        "console_scripts": [],
+        "console_scripts": ["logmerge-csv=csvlog.command_line:main"],
     },
 )

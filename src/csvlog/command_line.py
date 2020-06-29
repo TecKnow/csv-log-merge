@@ -27,8 +27,12 @@ def create_csv_merge_argument_parser():
     return csv_merge_parser
 
 
-if __name__ == "__main__":
+def main():
     parser = create_csv_merge_argument_parser()
     args = parser.parse_args()
     logging.getLogger().setLevel(args.log_level)
     logger.info(args)
+
+
+if __name__ == "__main__":
+    main()
