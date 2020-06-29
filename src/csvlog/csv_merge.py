@@ -4,10 +4,7 @@ import os
 import shutil
 from datetime import datetime
 
-logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 logger = logging.getLogger(__name__)
-
-logger.info(f"{__name__} has been entered.")
 
 
 def get_csv_files(sourcedir):

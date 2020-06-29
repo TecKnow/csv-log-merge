@@ -1,4 +1,4 @@
-from argparse import ArgumentError
+import os
 from pathlib import Path
 
 import pytest
@@ -10,9 +10,10 @@ class TestCommandLine:
     """
     This class contains test for the command line argument parser
 
-    One challenge in testing the _argparse_ parser is that it throws a _SystemExit_ exception if it can't make sense of
-    the input, as well as an _argparse.ArgumentError_.  This means that they both need to be caught in the correct order
-    for error tests to pass.
+    Be aware that if it can't make sense of the input, _argparse.ArgumentParser ultimately throws a SystemExit
+    exception, which can interfere with any further tests.  It also throws an ArgumentError but it doesn't appear that
+    this can be caught.  It seems that the ArgumentParser catches the ArgumentError internally and re-raises the
+    SystemExit exception.
     """
 
     def test_default_arguments(self, arg_parser):
@@ -31,28 +32,55 @@ class TestCommandLine:
         """
         args = arg_parser.parse_args([])
         assert args.backup_directory is None
-        assert isinstance(args.input_directory,
-                          Path)
+
+        assert isinstance(args.output_file, Path)
+        assert str(args.output_file.relative_to(Path.cwd())) == args.output_file.name
+        assert args.output_file.suffix == ".csv"
+
+        assert isinstance(args.input_directory, Path)
         assert args.input_directory == Path.cwd()
+
+        assert args.backup_directory is None
+
         assert args.log_level == "WARN"
-        assert args.output_file is None
 
     def test_bad_log_level(self, arg_parser):
         """
         Test that invalid log levels cannot be specified on the command line
 
         This also demonstrates how to make a test with bad arguments pass.
-
-        Be aware that the _argparse_ module tries to throw an _argparse.ArgumentError_ and a _SystemExit_ error
-        separately.  They must be trapped separately and in the correct order for the test to pass.
         """
-        with pytest.raises(SystemExit), pytest.raises(ArgumentError):
-            args = arg_parser.parse_args(["--log-level", "foo"])
+        with pytest.raises(SystemExit):
+            arg_parser.parse_args(["--log-level", "foo"])
 
     def test_log_level_case_insensitive(self, arg_parser):
         """Test that the log level command line argument is case insensitive"""
         args = arg_parser.parse_args(["--log-level", "dEbUg"])
         assert args.log_level == "DEBUG"
+
+    def test_input_directory_not_a_directory(self, arg_parser, argparse_test_dir):
+        with pytest.raises(SystemExit):
+            arg_parser.parse_args(["--input-directory", str(Path(argparse_test_dir, "exists.csv"))])
+
+    def test_input_directory_does_not_exist(self, arg_parser, argparse_test_dir):
+        with pytest.raises(SystemExit):
+            arg_parser.parse_args(["--input-directory", str(Path(argparse_test_dir, "not_a_real_file"))])
+
+    def test_output_file_already_exists(self, arg_parser, argparse_test_dir):
+        with pytest.raises(SystemExit):
+            arg_parser.parse_args(["--output-file", str(Path(argparse_test_dir, "exists.csv"))])
+
+    def test_output_file_is_directory(self, arg_parser, argparse_test_dir):
+        with pytest.raises(SystemExit):
+            arg_parser.parse_args(["--output-file", str(Path(argparse_test_dir, "directory.csv"))])
+
+    def test_backup_directory_is_file(self, arg_parser, argparse_test_dir):
+        with pytest.raises(SystemExit):
+            arg_parser.parse_args(["--backup-directory", str(Path(argparse_test_dir, "exists.csv"))])
+
+    def test_backup_directory_does_not_exist(self, arg_parser, argparse_test_dir):
+        with pytest.raises(SystemExit):
+            arg_parser.parse_args(["--backup-directory", str(Path(argparse_test_dir, "not_a_real_file"))])
 
 
 @pytest.fixture
@@ -64,6 +92,18 @@ def arg_parser():
     declaring a new fixture.
     """
     return create_csv_merge_argument_parser()
+
+
+@pytest.fixture
+def argparse_test_dir(tmp_path):
+    previous_cwd = Path.cwd()
+    # noinspection PyTypeChecker
+    os.chdir(tmp_path)
+    Path(tmp_path, "exists.csv").touch()
+    Path(tmp_path, "directory.csv").mkdir()
+    yield tmp_path
+    # noinspection PyTypeChecker
+    os.chdir(previous_cwd)
 
 
 if __name__ == '__main__':
