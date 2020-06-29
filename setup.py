@@ -12,7 +12,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/TecKnow/cperkins-csv-log",
-    packages=setuptools.find_packages('src'),
+    packages=setuptools.find_packages(where='src'),
     package_dir={"": "src"},
     classifiers=[
         "Programming Language :: Python :: 3",
