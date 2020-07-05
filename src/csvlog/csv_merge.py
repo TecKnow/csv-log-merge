@@ -14,7 +14,7 @@ DEFAULT_HEADER_ROW = ["Record Type", "Material Order", "Job number", "Descriptio
 
 
 def merge_log_files(search_directory: PathType, output_file_path: PathType, recurse: bool = False,
-                    header_row: Optional[Sequence[str]] = None,
+                    header_row: Optional[Union[Sequence[str], bool]] = None,
                     archive_directory: Optional[PathType] = None) -> None:
     search_directory = Path(search_directory) if search_directory is not None else None
     output_file_path = Path(output_file_path)
@@ -28,9 +28,12 @@ def merge_log_files(search_directory: PathType, output_file_path: PathType, recu
         move_file_to_archive(file_path, archive_directory, file_path)
 
 
-def log_file_combiner(output_file_path: Path, header_row: Optional[Sequence[str]] = None) -> Callable[
+# TODO: Does this need to be a closure?
+# The context manager won't kee the file open for the inner function.
+def log_file_combiner(output_file_path: Path,
+                      header_row: Optional[Union[Sequence[str], bool]] = None) -> Callable[
     [Iterator[Path]], Iterator[Path]]:
-    with output_file_path.open(newline='') as output_file:
+    with output_file_path.open(mode="w", newline='') as output_file:
         log_writer = writer(output_file)
         if header_row:
             if not isinstance(header_row, Sequence):
@@ -38,12 +41,14 @@ def log_file_combiner(output_file_path: Path, header_row: Optional[Sequence[str]
             log_writer.writerow(header_row)
 
         def log_file_combiner_closure(input_file_paths: Iterator[Path]) -> Iterator[Path]:
-            for input_file_path in input_file_paths:
-                with input_file_path.open(newline='') as input_file:
-                    log_reader = reader(input_file)
-                    was_merged = log_record_combiner(log_writer, log_reader, header_row)
-                if was_merged:
-                    yield input_file_path
+            with output_file_path.open(mode="a", newline="") as combiner_output_file:
+                combiner_writer = writer(combiner_output_file)
+                for input_file_path in input_file_paths:
+                    with input_file_path.open(newline='') as input_file:
+                        log_reader = reader(input_file)
+                        was_merged = log_record_combiner(combiner_writer, log_reader, header_row)
+                    if was_merged:
+                        yield input_file_path
 
         return log_file_combiner_closure
 
