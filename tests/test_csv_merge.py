@@ -133,8 +133,8 @@ class TestMoveFilesToArchive:
 
     def test_file_in_sub_directory(self, csv_merge_test_directory):
         archive_folder_path = Path(csv_merge_test_directory, "archive")
-        original_file_path = Path(csv_merge_test_directory, "subdirectory", "names.csv")
-        archive_file_path = Path(csv_merge_test_directory, "archive", "subdirectory", "names.csv")
+        original_file_path = Path(csv_merge_test_directory, "subdirectory", "food.csv")
+        archive_file_path = Path(csv_merge_test_directory, "archive", "subdirectory", "food.csv")
         assert original_file_path.exists()
         assert not archive_file_path.exists()
         move_file_to_archive(csv_merge_test_directory, archive_folder_path, original_file_path)
@@ -142,7 +142,21 @@ class TestMoveFilesToArchive:
         assert archive_file_path.exists()
 
     def test_file_exists_in_archive(self, csv_merge_test_directory):
-        pass
+        """Demonstrate what the program does if a file already exists in the archive.
+
+           Right now it will stop in the middle of a run, meaning that some files may be moved and others not.
+           This could be very inconvenient.  However, it is not likely to happen often, and it isn't 100% clear what
+           the program should do instead."""
+        archive_folder_path = Path(csv_merge_test_directory, "archive")
+        original_file_path = Path(csv_merge_test_directory, "names.csv")
+        archive_file_path = Path(csv_merge_test_directory, "archive", "names.csv")
+        archive_file_path.touch()
+        assert original_file_path.exists()
+        assert archive_file_path.exists()
+        with pytest.raises(FileExistsError):
+            move_file_to_archive(csv_merge_test_directory, archive_folder_path, original_file_path)
+        assert original_file_path.exists()
+        assert archive_file_path.exists()
 
 
 class TestMergeLogFiles:
@@ -227,7 +241,7 @@ def csv_merge_test_directory(tmp_path):
     animal_path = Path(tmp_path, "animals_bad_header.csv")
     with animal_path.open(mode="w", newline='') as animal_file:
         csv.writer(animal_file).writerows(([BAD_HEADER_LIST] + ANIMAL_LIST))
-    food_path = Path(subdirectory_path, "names.csv")
+    food_path = Path(subdirectory_path, "food.csv")
     with food_path.open(mode='w', newline='') as food_file:
         csv.writer(food_file).writerows(([HEADER_LIST] + FOOD_LIST))
     return tmp_path

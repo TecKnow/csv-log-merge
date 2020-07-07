@@ -31,8 +31,8 @@ def merge_log_files(search_directory: PathType, output_file_path: PathType, recu
 # TODO: Does this need to be a closure?
 # The context manager won't kee the file open for the inner function.
 def log_file_combiner(output_file_path: Path,
-                      header_row: Optional[Union[Sequence[str], bool]] = None) -> Callable[
-    [Iterator[Path]], Iterator[Path]]:
+                      header_row: Optional[Union[Sequence[str], bool]] =
+                      None) -> Callable[[Iterator[Path]], Iterator[Path]]:
     with output_file_path.open(mode="w", newline='') as output_file:
         log_writer = writer(output_file)
         if header_row:
