@@ -6,7 +6,7 @@ from typing import Iterator, Sequence, Tuple
 
 import pytest
 
-from csvlog.csv_merge import get_csv_paths_in_directory, log_record_combiner, log_file_combiner
+from csvlog.csv_merge import get_csv_paths_in_directory, log_record_combiner, log_file_combiner, move_file_to_archive
 
 
 class TestGetCSVPathsInDirectory:
@@ -87,6 +87,11 @@ class TestLogRecordCombiner:
 
 class TestLogFileCombiner:
     def test_default_header(self, csv_merge_test_directory):
+        # It's inconvenient if the sample production file is in the normal test directory structure, so it isn't.
+        # This shows how to include it.
+        sample_path = Path(csv_merge_test_directory, "sample.csv")
+        with sample_path.open(mode="w", newline='') as sample_file:
+            csv.writer(sample_file).writerows(SAMPLE_FILE_LIST)
         output_path = Path(csv_merge_test_directory, "test_out.csv")
         input_paths = get_csv_paths_in_directory(directory=csv_merge_test_directory, ignore=output_path, recurse=False)
         log_merger = log_file_combiner(output_path, header_row=True)
@@ -94,15 +99,50 @@ class TestLogFileCombiner:
         assert tuple(merged_file_paths) == (Path(csv_merge_test_directory, "sample.csv"),)
         assert tuple((*csv.reader(output_path.open(newline="")),)) == SAMPLE_FILE_LIST
 
-    def test_custom_header(self):
-        pass
+    def test_custom_header(self, csv_merge_test_directory):
+        output_path = Path(csv_merge_test_directory, "test_out.csv")
+        input_paths = get_csv_paths_in_directory(directory=csv_merge_test_directory, ignore=output_path, recurse=False)
+        log_merger = log_file_combiner(output_path, header_row=HEADER_LIST)
+        merged_file_paths = log_merger(input_paths)
+        assert set(merged_file_paths) == {Path(csv_merge_test_directory, "names.csv"),
+                                          Path(csv_merge_test_directory, "places.csv")}
+        assert tuple((*csv.reader(output_path.open(newline="")),)) == tuple([HEADER_LIST] + NAME_LIST + PLACES_LIST)
 
-    def test_skipped_files(self):
-        pass
+    def test_no_header(self, csv_merge_test_directory):
+        output_path = Path(csv_merge_test_directory, "test_out.csv")
+        input_paths = get_csv_paths_in_directory(directory=csv_merge_test_directory, ignore=output_path, recurse=False)
+        log_merger = log_file_combiner(output_path, header_row=None)
+        merged_file_paths = log_merger(input_paths)
+        assert set(merged_file_paths) == {Path(csv_merge_test_directory, "names.csv"),
+                                          Path(csv_merge_test_directory, "places.csv"),
+                                          Path(csv_merge_test_directory, "animals_bad_header.csv")}
+        assert tuple((*csv.reader(output_path.open(newline="")),)) == tuple(
+            [BAD_HEADER_LIST] + ANIMAL_LIST + [HEADER_LIST] + NAME_LIST + [HEADER_LIST] + PLACES_LIST)
 
 
 class TestMoveFilesToArchive:
-    pass
+    def test_file_in_top_directory(self, csv_merge_test_directory):
+        archive_folder_path = Path(csv_merge_test_directory, "archive")
+        original_file_path = Path(csv_merge_test_directory, "names.csv")
+        archive_file_path = Path(csv_merge_test_directory, "archive", "names.csv")
+        assert original_file_path.exists()
+        assert not archive_file_path.exists()
+        move_file_to_archive(csv_merge_test_directory, archive_folder_path, original_file_path)
+        assert not original_file_path.exists()
+        assert archive_file_path.exists()
+
+    def test_file_in_sub_directory(self, csv_merge_test_directory):
+        archive_folder_path = Path(csv_merge_test_directory, "archive")
+        original_file_path = Path(csv_merge_test_directory, "subdirectory", "names.csv")
+        archive_file_path = Path(csv_merge_test_directory, "archive", "subdirectory", "names.csv")
+        assert original_file_path.exists()
+        assert not archive_file_path.exists()
+        move_file_to_archive(csv_merge_test_directory, archive_folder_path, original_file_path)
+        assert not original_file_path.exists()
+        assert archive_file_path.exists()
+
+    def test_file_exists_in_archive(self, csv_merge_test_directory):
+        pass
 
 
 class TestMergeLogFiles:
@@ -176,21 +216,20 @@ SAMPLE_FILE_ROWS = [",".join(row) for row in SAMPLE_FILE_LIST]
 def csv_merge_test_directory(tmp_path):
     subdirectory_path = Path(tmp_path, "subdirectory")
     subdirectory_path.mkdir()
+    archive_path = Path(tmp_path, "archive")
+    archive_path.mkdir()
     names_path = Path(tmp_path, "names.csv")
-    sample_path = Path(tmp_path, "sample.csv")
-    with sample_path.open(mode="w", newline='') as sample_file:
-        csv.writer(sample_file).writerows(SAMPLE_FILE_LIST)
     with names_path.open(mode='w', newline='') as names_file:
-        csv.writer(names_file).writerows((*HEADER_LIST, *NAME_LIST))
+        csv.writer(names_file).writerows([HEADER_LIST] + NAME_LIST)
     places_path = Path(tmp_path, "places.csv")
     with places_path.open(mode='w', newline='') as places_file:
-        csv.writer(places_file).writerows((*HEADER_LIST, *PLACES_LIST))
+        csv.writer(places_file).writerows([HEADER_LIST] + PLACES_LIST)
+    animal_path = Path(tmp_path, "animals_bad_header.csv")
+    with animal_path.open(mode="w", newline='') as animal_file:
+        csv.writer(animal_file).writerows(([BAD_HEADER_LIST] + ANIMAL_LIST))
     food_path = Path(subdirectory_path, "names.csv")
     with food_path.open(mode='w', newline='') as food_file:
-        csv.writer(food_file).writerows((*HEADER_LIST, *FOOD_LIST))
-    animal_path = Path(subdirectory_path, "animals_bad_header.csv")
-    with animal_path.open(mode="w", newline='') as animal_file:
-        csv.writer(animal_file).writerows((*BAD_HEADER_LIST, *ANIMAL_LIST))
+        csv.writer(food_file).writerows(([HEADER_LIST] + FOOD_LIST))
     return tmp_path
 
 

@@ -77,6 +77,7 @@ def get_csv_paths_in_directory(directory: PathType, ignore: Optional[PathType] =
 def move_file_to_archive(search_directory: Path, archive_directory: Path, file_to_move: Path) -> None:
     relative_path = file_to_move.relative_to(search_directory)
     destination_path = Path(archive_directory, relative_path)
+    destination_path.parent.mkdir(parents=True, exist_ok=True)
     if destination_path.exists():
         logger.error(f"Destination file {destination_path} already exists.")
         raise FileExistsError
