@@ -6,7 +6,8 @@ from typing import Iterator, Sequence, Tuple
 
 import pytest
 
-from csvlog.csv_merge import get_csv_paths_in_directory, log_record_combiner, log_file_combiner, move_file_to_archive
+from csvlog.csv_merge import (get_csv_paths_in_directory, log_record_combiner, log_file_combiner, move_file_to_archive,
+                              merge_log_files)
 
 
 class TestGetCSVPathsInDirectory:
@@ -160,7 +161,19 @@ class TestMoveFilesToArchive:
 
 
 class TestMergeLogFiles:
-    pass
+
+    # TODO: Find some way to test the default filename algorithm.
+    # Since it is clock based, a straightforward implementation might be flaky.
+    # On the other hand, alternatives like monkeypatching the time are significant steps.
+    def test_basic_operation(self, csv_merge_test_directory):
+        output_path = Path(csv_merge_test_directory, "output.csv")
+        merge_log_files(search_directory=csv_merge_test_directory, output_file_path=output_path, header_row=HEADER_LIST,
+                        archive_directory=Path(csv_merge_test_directory, "archive"))
+        assert tuple((*csv.reader(output_path.open(newline="")),)) == tuple([HEADER_LIST] + NAME_LIST + PLACES_LIST)
+        assert not Path(csv_merge_test_directory, "names.csv").exists()
+        assert not Path(csv_merge_test_directory, "places.csv").exists()
+        assert Path(csv_merge_test_directory, "archive", "names.csv").exists()
+        assert Path(csv_merge_test_directory, "archive", "places.csv").exists()
 
 
 HEADER_LIST = "ALPHA BRAVO CHARLIE DELTA ECHO".split()

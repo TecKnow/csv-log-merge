@@ -25,10 +25,9 @@ def merge_log_files(search_directory: PathType, output_file_path: PathType, recu
     combiner = log_file_combiner(output_file_path, header_row)
     iterator_of_merged_files = combiner(csv_file_iterator)
     for file_path in iterator_of_merged_files:
-        move_file_to_archive(file_path, archive_directory, file_path)
+        move_file_to_archive(search_directory, archive_directory, file_path)
 
 
-# TODO: Does this need to be a closure?
 # The context manager won't kee the file open for the inner function.
 def log_file_combiner(output_file_path: Path,
                       header_row: Optional[Union[Sequence[str], bool]] =
