@@ -4,6 +4,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
+from csvlog.csv_merge import merge_log_files
+
 logging.basicConfig()
 logger = logging.getLogger(__name__)
 
@@ -69,6 +71,8 @@ def main():
     args = parser.parse_args()
     logging.getLogger().setLevel(args.log_level)
     logger.info(args)
+    merge_log_files(search_directory=args.input_directory, output_file_path=args.output_file, recurse=False,
+                    header_row=None, archive_directory=args.backup_directory)
 
 
 if __name__ == "__main__":
