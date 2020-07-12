@@ -8,6 +8,10 @@ from typing import Optional, Union
 
 logger = logging.getLogger(__name__)
 
+# These match the default log levels defined in the logging package in order of severity.
+# NOTSET on the root logger means that all messages will be shown.
+log_levels = "critical error warning info debug notset".upper().split()
+
 # TODO:  This is also in csv_merge.py, remove the duplication
 default_header = ["Record Type", "Material Order", "Job number", "Description", "", "", "", "Record key", "", ""]
 default_config_file_location = Path(Path.home(), "Documents", "csvmerge", "logmerge.cfg")
@@ -26,7 +30,8 @@ class LogmergeConfig:
         self.archive_folder = Path(self.cfg.get("ARCHIVE", "Folder", fallback=default_archive_location))
         self.archive = self.cfg.getboolean("ARCHIVE", "AutoArchive", fallback=True)
         self.output_location = Path(self.cfg.get("OUTPUT", "Folder", fallback=default_output_location))
-        self.log_level = self.cfg.get("OUTPUT", "LogLevel", fallback="WARN")
+        self.log_level = self.cfg.get("OUTPUT", "LogLevel", fallback="WARNING")
+        self.input_directory = None
 
 
 def get_configuration(config_file_path: Optional[Union[PathLike, Path]] = None) -> LogmergeConfig:
@@ -63,11 +68,12 @@ def write_default_config(config_file_path: Union[PathLike, Path] = default_confi
 
 
 def create_default_config() -> configparser.ConfigParser:
+    # TODO: Add a prefernece for no automatic header checking?
     cfg = configparser.ConfigParser()
     cfg["SEARCH"] = {"Header": repr(default_header),
                      "AutoRecursive": str(False)}
     cfg["ARCHIVE"] = {"Folder": str(default_archive_location),
                       "AutoArchive": str(True)}
     cfg["OUTPUT"] = {"Folder": str(default_output_location),
-                     "LogLevel": "WARN"}
+                     "LogLevel": "WARNING"}
     return cfg

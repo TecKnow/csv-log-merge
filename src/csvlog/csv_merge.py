@@ -8,35 +8,28 @@ logger = logging.getLogger(__name__)
 
 PathType = Union[str, bytes, PathLike, PurePath]
 
-# Header row
-# Record Type,Material Order,Job number,Description,,,,Record key,,
-DEFAULT_HEADER_ROW = ["Record Type", "Material Order", "Job number", "Description", "", "", "", "Record key", "", ""]
-
 
 def merge_log_files(search_directory: PathType, output_file_path: PathType, recurse: bool = False,
-                    header_row: Optional[Union[Sequence[str], bool]] = None,
+                    header_row: Optional[Sequence[str]] = None,
                     archive_directory: Optional[PathType] = None) -> None:
-    search_directory = Path(search_directory) if search_directory is not None else None
+    search_directory = Path(search_directory)
     output_file_path = Path(output_file_path)
     archive_directory = Path(archive_directory) if archive_directory is not None else None
-    if header_row and not isinstance(header_row, Sequence):
-        header_row = DEFAULT_HEADER_ROW
     csv_file_iterator = get_csv_paths_in_directory(search_directory, output_file_path, recurse)
     combiner = log_file_combiner(output_file_path, header_row)
     iterator_of_merged_files = combiner(csv_file_iterator)
     for file_path in iterator_of_merged_files:
-        move_file_to_archive(search_directory, archive_directory, file_path)
+        if archive_directory is not None:
+            move_file_to_archive(search_directory, archive_directory, file_path)
 
 
-# The context manager won't kee the file open for the inner function.
+# The context manager won't keep the file open for the inner function.
 def log_file_combiner(output_file_path: Path,
-                      header_row: Optional[Union[Sequence[str], bool]] =
+                      header_row: Optional[Sequence[str]] =
                       None) -> Callable[[Iterator[Path]], Iterator[Path]]:
     with output_file_path.open(mode="w", newline='') as output_file:
         log_writer = writer(output_file)
         if header_row:
-            if not isinstance(header_row, Sequence):
-                header_row = DEFAULT_HEADER_ROW
             log_writer.writerow(header_row)
 
         def log_file_combiner_closure(input_file_paths: Iterator[Path]) -> Iterator[Path]:

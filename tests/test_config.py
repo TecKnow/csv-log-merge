@@ -17,7 +17,7 @@ class TestLogmergeConfig:
         assert lmc.archive_folder == default_archive_location
         assert lmc.archive is True
         assert lmc.output_location == default_output_location
-        assert lmc.log_level == "WARN"
+        assert lmc.log_level == "WARNING"
 
 
 class TestCreateDefaultConfig:
@@ -36,7 +36,7 @@ class TestCreateDefaultConfig:
         assert cfg.get("ARCHIVE", "Folder") == str(default_archive_location)
         assert cfg.getboolean("ARCHIVE", "AutoArchive") is True
         assert cfg.get("OUTPUT", "Folder") == str(default_output_location)
-        assert cfg.get("OUTPUT", "LogLevel") == "WARN"
+        assert cfg.get("OUTPUT", "LogLevel") == "WARNING"
 
     def test_custom_location_is_directory(self, tmp_path):
         directory_path = Path(tmp_path, "subfolder")
@@ -58,7 +58,7 @@ class TestLoadOrCreateConfigparser:
         assert cfg.get("ARCHIVE", "Folder") == str(default_archive_location)
         assert cfg.getboolean("ARCHIVE", "AutoArchive") is True
         assert cfg.get("OUTPUT", "Folder") == str(default_output_location)
-        assert cfg.get("OUTPUT", "LogLevel") == "WARN"
+        assert cfg.get("OUTPUT", "LogLevel") == "WARNING"
 
     def test_read_custom_config(self, tmp_path):
         archive_path = Path(tmp_path, "archive")
