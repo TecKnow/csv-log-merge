@@ -19,7 +19,7 @@ Enter **git clone _REPO_PATH_**.
 1.  Navigate into the top level of the repository, it should be a folder called _cperkins-csv-log_.
 1. In this directory enter **python -m venv venv**.
 1. There will be a short delay.
-1. At the command line enter **venv\scripts\activate**
+1. At the command line enter **venv\\scripts\\activate**
 1. Your prompt should now have something like _(venv)_ at the beginning of it.
 1. Enter **python -m pip install --upgrade pip**
 1. Enter **python -m pip install -r requirements.txt**
@@ -29,3 +29,19 @@ Enter **git clone _REPO_PATH_**.
 1. Enter **python -m pytest**
 1. Congratulations.  If there were no errors you should now be ready to work on the project.
 1. When you're finished working in the virtual environment, enter **deactivate** to leave it.
+
+## Building the user application
+1.  Follow the instructions above and make sure that you're still in the virtual environment.
+   1.  Your prompt will have something like (venv) at the beginning of it.
+1.  Enter the following command, where _program name_ is the name you would like the executable to have: **pyinstaller --onefile --name <_program_name_> src\\csvlog\\command_line.py**
+1.  Quite a bit of output will go scrolling past your terminal.
+1.  If the process is sucessful, you will see something like the following:
+```
+2517 INFO: Appending archive to EXE D:\Users\teckn\PycharmProjects\cperkins\cperkins-csv-log\dist\program_name.exe
+2530 INFO: Building EXE from EXE-00.toc completed successfully.
+```
+1.  To The _EXE_ file in the _dist_ directory is the application.
+1.  To see that it worked, enter the following command:  **dist\\<_program_name_>.exe --help**
+   1.  You should see the program's help text.
+
+
