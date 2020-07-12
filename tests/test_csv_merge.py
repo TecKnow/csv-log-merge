@@ -87,18 +87,6 @@ class TestLogRecordCombiner:
 
 
 class TestLogFileCombiner:
-    def test_default_header(self, csv_merge_test_directory):
-        # It's inconvenient if the sample production file is in the normal test directory structure, so it isn't.
-        # This shows how to include it.
-        sample_path = Path(csv_merge_test_directory, "sample.csv")
-        with sample_path.open(mode="w", newline='') as sample_file:
-            csv.writer(sample_file).writerows(SAMPLE_FILE_LIST)
-        output_path = Path(csv_merge_test_directory, "test_out.csv")
-        input_paths = get_csv_paths_in_directory(directory=csv_merge_test_directory, ignore=output_path, recurse=False)
-        log_merger = log_file_combiner(output_path, header_row=True)
-        merged_file_paths = log_merger(input_paths)
-        assert tuple(merged_file_paths) == (Path(csv_merge_test_directory, "sample.csv"),)
-        assert tuple((*csv.reader(output_path.open(newline="")),)) == SAMPLE_FILE_LIST
 
     def test_custom_header(self, csv_merge_test_directory):
         output_path = Path(csv_merge_test_directory, "test_out.csv")
