@@ -4,14 +4,14 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="cperkins-CSV-log",
+    name="csv-log-merge",
     version="0.0.1",
-    author="Casey Perkins",
-    author_email="perkinscc07@gmail.com",
-    description="A package for managing multiple CSV log files",
+    author="David P. Perkins",
+    author_email="david.perkins@grumbleware.com",
+    description="A package for merging multiple CSV log files",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/TecKnow/cperkins-csv-log",
+    url="https://github.com/TecKnow/csv-log-merge",
     packages=setuptools.find_packages(where='src'),
     package_dir={"": "src"},
     classifiers=[
