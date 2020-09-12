@@ -1,5 +1,12 @@
-# cperkins-csv-log
-A utility for combining all the CSV files in a directory.
+# csv-log-merge
+This is a command line utility for combining CSV files with a parituclar header.  It supports recursive searches.  Default behavior is specified in a per-user configuration file and can be overriden with command line options.
+
+This project is a useful demonstration of the following Python tools and packages:
+*  Python package management using _venv_ and _requirements.txt_
+*  Standalone executables using _pyinstaller_
+*  Command line argument parsing using _argparse_
+*  User-editable configuration files using _configparser_
+*  Modern Python file system operations using _pathlib_
 
 ## Setting up for development
 ### Technologies used
